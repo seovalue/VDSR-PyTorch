@@ -164,7 +164,7 @@ for epoch in range(args.epochs):
 
     # Save model
     if (epoch + 1) % 5 == 0:
-        torch.save(model.state_dict(), f"weights/vdsr_{args.scale_factor}x_epoch_{epoch + 1}.pth")
+        torch.save(model.state_dict(), f"weights/vdsr_{args.scale_factor}x_epoch_{epoch + 1}_feature_type_{args.feature_type}.pth")
     if avg_psnr > best_psnr:
         best_psnr = avg_psnr
         torch.save(model.state_dict(), f"weights/vdsr_{args.scale_factor}x.pth")
