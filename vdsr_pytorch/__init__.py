@@ -12,13 +12,13 @@
 # limitations under the License.
 # ==============================================================================
 from .calculate_niqe import cal_niqe
-from .datasets import DatasetFromFolder
-from .datasets import check_image_file
 from .model import VDSR
+from .datasets import FeatureDataset
+from .datasets import get_data_loader
 
 __all__ = [
     "cal_niqe",
-    "DatasetFromFolder",
-    "check_image_file",
-    "VDSR"
+    "VDSR",
+    "FeatureDataset",
+    "get_data_loader"
 ]

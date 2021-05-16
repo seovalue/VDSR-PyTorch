@@ -24,8 +24,13 @@ import torch.utils.data.distributed
 from torch.cuda import amp
 from tqdm import tqdm
 
-from vdsr_pytorch import DatasetFromFolder
 from vdsr_pytorch import VDSR
+from vdsr_pytorch import FeatureDataset
+from vdsr_pytorch import get_data_loader
+
+import warnings
+warnings.filterwarnings(action='ignore')
+
 
 parser = argparse.ArgumentParser(description="Accurate Image Super-Resolution Using Very Deep Convolutional Networks")
 parser.add_argument("--dataroot", type=str, default="./data/VOC2012",
@@ -59,6 +64,9 @@ parser.add_argument("--manualSeed", type=int, default=0,
                     help="Seed for initializing training. (default:0)")
 parser.add_argument("--cuda", action="store_true", help="Enables cuda")
 
+## custom
+parser.add_argument("--feature-type", type=str, default="p2")
+
 args = parser.parse_args()
 print(args)
 
@@ -78,27 +86,11 @@ cudnn.benchmark = True
 if torch.cuda.is_available() and not args.cuda:
     print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-train_dataset = DatasetFromFolder(f"{args.dataroot}/train",
-                                  image_size=args.image_size,
-                                  scale_factor=args.scale_factor)
-val_dataset = DatasetFromFolder(f"{args.dataroot}/val",
-                                image_size=args.image_size,
-                                scale_factor=args.scale_factor)
-
-train_dataloader = torch.utils.data.DataLoader(train_dataset,
-                                               batch_size=args.batch_size,
-                                               shuffle=True,
-                                               pin_memory=True,
-                                               num_workers=int(args.workers))
-val_dataloader = torch.utils.data.DataLoader(val_dataset,
-                                             batch_size=args.batch_size,
-                                             shuffle=False,
-                                             pin_memory=True,
-                                             num_workers=int(args.workers))
+train_dataloader, val_dataloader = get_data_loader(args.dataroot, args.feature_type, args.scale_factor, args.batch_size, args.workers)
 
 device = torch.device("cuda:0" if args.cuda else "cpu")
 
-model = VDSR().to(device)
+model = VDSR(args.scale_factor).to(device)
 
 if args.weights:
     model.load_state_dict(torch.load(args.weights, map_location=device))
@@ -171,7 +163,7 @@ for epoch in range(args.epochs):
     scheduler.step()
 
     # Save model
-    if (epoch + 1) % 20 == 0:
+    if (epoch + 1) % 5 == 0:
         torch.save(model.state_dict(), f"weights/vdsr_{args.scale_factor}x_epoch_{epoch + 1}.pth")
     if avg_psnr > best_psnr:
         best_psnr = avg_psnr
