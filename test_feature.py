@@ -36,8 +36,6 @@ from vdsr_pytorch import VDSR
 
 parser = argparse.ArgumentParser(description="Accurate Image Super-Resolution Using Very Deep Convolutional Networks")
 
-parser.add_argument("--directory", type=str,
-                    help="Directory where features are saved.")
 parser.add_argument("--datapath", type=str)                    
 parser.add_argument("--feature-type", type=str)
 # parser.add_argument("--file", type=str,
@@ -59,10 +57,6 @@ if torch.cuda.is_available() and not args.cuda:
 device = torch.device("cuda:0" if args.cuda else "cpu")
 
 # Crop features
-
-root_dir = args.directory + args.feature_type +"/"
-# file_list = os.listdir(root_dir)
-
 data_path = args.datapath
 datatype = args.feature_type
 rescale_factor = args.scale_factor
@@ -101,7 +95,7 @@ model.eval()
 count = 0
 for file in hr_imgs:
     # Open feature
-    feature = Image.open(file)
+    feature = file
     feature_width = int(feature.size[0] * args.scale_factor)
     feature_height = int(feature.size[1] * args.scale_factor)
     feature = feature.resize((feature_width, feature_height), Image.BICUBIC)
