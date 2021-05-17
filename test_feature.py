@@ -98,9 +98,10 @@ model.load_state_dict(torch.load(args.weights, map_location=device))
 # Set eval mode
 model.eval()
 
+count = 0
 for file in hr_imgs:
     # Open feature
-    feature = Image.open(dir + file)
+    feature = Image.open(file)
     feature_width = int(feature.size[0] * args.scale_factor)
     feature_height = int(feature.size[1] * args.scale_factor)
     feature = feature.resize((feature_width, feature_height), Image.BICUBIC)
@@ -121,5 +122,5 @@ for file in hr_imgs:
     out_image_y = Image.fromarray(np.uint8(out_image_y[0]), mode="L")
 
     out_img = Image.merge("Y", [out_image_y])
-    file_name = file[-13:-7]
-    out_img.save(f"outputs/outputs_{file_name}_{args.scale_factor}x.png")
+    out_img.save(f"outputs/outputs_{count}_{args.scale_factor}x.png")
+    count += 1
